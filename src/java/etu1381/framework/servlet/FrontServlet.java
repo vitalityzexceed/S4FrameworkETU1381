@@ -7,17 +7,19 @@ package etu1381.framework.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import etu1381.framework.Mapping;
 
 /**
  *
  * @author OMEN
  */
 public class FrontServlet extends HttpServlet {
-
+    private HashMap<String, Mapping> MappingUrls;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
