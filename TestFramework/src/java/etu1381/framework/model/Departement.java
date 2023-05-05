@@ -5,6 +5,7 @@
 package etu1381.framework.model;
 
 import etu1381.framework.annotation.URLAnnotation;
+import etu1381.framework.modelview.ModelView;
 
 /**
  *
@@ -36,14 +37,14 @@ public class Departement {
     }
 
     @URLAnnotation("/urlsalutdepartement")
-    public String getsalutdepartment()
+    public ModelView getsalutdepartment()
     {
-        return "salut";
+        return new ModelView("SalutDept");
     }    
 
     @URLAnnotation("/urlnbdepartements")
-    public int getnbdepartements()
+    public ModelView getnbdepartements()
     {
-        return 10;
+        return new ModelView("NbDept");
     }
 }
