@@ -1,4 +1,4 @@
-javac -d Framework/build/web/WEB-INF/classes Framework/src/java/etu1381/framework/*.java Framework/src/java/etu1381/framework/annotation/*.java Framework/src/java/etu1381/framework/init/*.java Framework/src/java/etu1381/framework/servlet/*.java
+javac -d Framework/build/web/WEB-INF/classes Framework/src/java/etu1381/framework/*.java Framework/src/java/etu1381/framework/modelview/*.java Framework/src/java/etu1381/framework/annotation/*.java Framework/src/java/etu1381/framework/init/*.java Framework/src/java/etu1381/framework/servlet/*.java
 cd Framework/build/web/WEB-INF/classes/
 jar cvf ../../../../../TestFramework/WEB-INF/lib/framework.jar etu1381
 cd ../../../../../
