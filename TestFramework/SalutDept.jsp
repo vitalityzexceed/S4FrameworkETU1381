@@ -8,5 +8,7 @@
 </head>
 <body>
     <% out.println("Salut"); %>
+    <% out.println(request.getAttribute("Prenom")); %>
+
 </body>
 </html>
