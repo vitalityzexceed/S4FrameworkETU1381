@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.RequestDispatcher;
 import java.util.List;
 import etu1381.framework.Mapping;
 import etu1381.framework.annotation.URLAnnotation;
@@ -41,14 +42,25 @@ public class FrontServlet extends HttpServlet {
             throws ServletException, IOException{
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            String urlentree = request.getPathInfo();
+            String urlentree = null;
+            try
+            {
+                urlentree = request.getRequestURI();
+                System.out.println("urlentree : " + urlentree);
+                System.out.println("last : " + urlentree.substring(urlentree.lastIndexOf('/')));
+                urlentree = urlentree.substring(urlentree.lastIndexOf('/')).split(".do")[0];
+            }
+            catch(Exception e)
+            {
+                System.out.println(e.getMessage());
+            }
 
             HashMap<String, Mapping> hashmap = new HashMap<>();
 
             try {
                 hashmap = Infoclass.geturlannotationhashmap();
             } catch (Exception e) {
-                out.println(e.getMessage());
+                System.out.println(e.getMessage());
             }
 
             //Sprint 5 : test sy mitovy ilay URL sur navigateur sy ny iray amin'ilay key hashmap
@@ -71,6 +83,7 @@ public class FrontServlet extends HttpServlet {
                         }
                     }
                     String typederetour = matchedmethod.getReturnType().getSimpleName();
+                    System.out.println("type de retour : " + typederetour);
                     ModelView returnedmodelview = null;
                     if (typederetour.equals("ModelView"))
                     {
@@ -82,7 +95,19 @@ public class FrontServlet extends HttpServlet {
                         Arrays.fill(arguments, null);
                         //atao dynamique ilay invoke
                         returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments);
-                        out.println("Mi retourne modelView => jsp : " + returnedmodelview.getView());
+                        //out.println("Mi retourne modelView => jsp : " + returnedmodelview.getView());
+                        //Sprint 6 : avant de dispatch, mettre des informations dans la requete
+                        //test de valeurs dans l'attribut data
+                        returnedmodelview.setData(new HashMap<String, Object>());
+                        returnedmodelview.addItem("Nom", new String("Rakoto"));
+                        returnedmodelview.addItem("Prenom", new String("Jean"));
+                        //test de valeurs dans l'attribut data
+
+                        for (String cledata : returnedmodelview.getData().keySet()) {
+                            request.setAttribute(cledata, returnedmodelview.getData().get(cledata));
+                        }
+                        RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+".jsp");
+                        dispat.forward(request,response);
                     }
                     else
                     {
@@ -110,7 +135,7 @@ public class FrontServlet extends HttpServlet {
                         }
                         catch(Exception e)
                         {
-                            out.println(e.getMessage());
+                            System.out.println(e.getMessage());
                         }
                         
                         out.println("<ul>Liste des classes");
@@ -153,7 +178,7 @@ public class FrontServlet extends HttpServlet {
         }
         catch(Exception e)
         {
-            System.out.println(e.getMessage());
+            System.out.println("Exception Printwriter " + e.getMessage());
         }
     }
  

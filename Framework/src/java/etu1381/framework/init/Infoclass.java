@@ -25,7 +25,7 @@ public class Infoclass {
         String path = packageName.replace('.', '/');
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL resource = classLoader.getResource(path);
-        System.out.println("url : " + resource.toString());
+        //System.out.println("url : " + resource.toString());
         File directory = new File(resource.getFile().replace("%20", " "));
         if (!directory.exists()) {
             return classes;
