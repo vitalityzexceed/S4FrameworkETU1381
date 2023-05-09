@@ -3,6 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package etu1381.framework.model;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import etu1381.framework.annotation.URLAnnotation;
 import etu1381.framework.modelview.ModelView;
 /**
@@ -15,11 +18,31 @@ public class Employe {
     private int age;
     private boolean engaged;
     
+    public Employe()
+    {
+    }
+
     public Employe(int id, String nom, int age, boolean engaged) {
         this.setId(id);
         this.setNom(nom);
         this.setAge(age);
         this.setEngaged(engaged);
+    }
+
+    public Employe(String id, String nom, String age, String engaged)
+    {
+        this.setId(Integer.parseInt(id));
+        this.setNom(nom);
+        this.setAge(Integer.parseInt(age));
+        this.setEngaged(Boolean.parseBoolean(engaged));
+    }
+
+    public Employe(ArrayList<String> attributsparametres)
+    {
+        this.setId(Integer.parseInt(attributsparametres.get(0)));
+        this.setNom(attributsparametres.get(1));
+        this.setAge(Integer.parseInt(attributsparametres.get(2)));
+        this.setEngaged(Boolean.parseBoolean(attributsparametres.get(3)));
     }
 
     @URLAnnotation("/urlemployerehetra")
@@ -51,9 +74,6 @@ public class Employe {
         return "coucou";
     }
 
-    public Employe()
-    {}
-
     public int getId() {
         return id;
     }
@@ -66,7 +86,7 @@ public class Employe {
         return age;
     }
 
-    public boolean isEngaged() {
+    public boolean getEngaged() {
         return engaged;
     }
 
@@ -84,6 +104,7 @@ public class Employe {
 
     public void setEngaged(boolean engaged) {
         this.engaged = engaged;
-    }    
+    }  
+
     
 }

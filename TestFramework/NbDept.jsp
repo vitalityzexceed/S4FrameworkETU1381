@@ -7,6 +7,11 @@
     <title>Document</title>
 </head>
 <body>
-    <% out.println("Nombre de departements"); %>
+    <% out.println("Formulaire departement"); %>
+    <form action="/urlnbdepartements.do" method="post">
+        <span>ID </span><input type="text" name="id">
+        <span>Nom </span><input type="text" name="nom">
+        <input type="submit">
+    </form>
 </body>
 </html>

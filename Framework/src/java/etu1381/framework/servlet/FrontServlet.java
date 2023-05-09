@@ -7,9 +7,11 @@ package etu1381.framework.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -52,7 +54,8 @@ public class FrontServlet extends HttpServlet {
             }
             catch(Exception e)
             {
-                System.out.println(e.getMessage());
+                System.out.println("Exception sur split url ");
+                e.printStackTrace();
             }
 
             HashMap<String, Mapping> hashmap = new HashMap<>();
@@ -60,7 +63,7 @@ public class FrontServlet extends HttpServlet {
             try {
                 hashmap = Infoclass.geturlannotationhashmap();
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
 
             //Sprint 5 : test sy mitovy ilay URL sur navigateur sy ny iray amin'ilay key hashmap
@@ -103,6 +106,77 @@ public class FrontServlet extends HttpServlet {
                         returnedmodelview.addItem("Prenom", new String("Jean"));
                         //test de valeurs dans l'attribut data
 
+                        
+
+                        //Sprint7 : maka donnees avy any anaty formulaire dia mi-save objet dia mi rediriger ao amle page teo ihany
+                        Field[] attributs = Class.forName(matchedmapping.getClassName()).getDeclaredFields();
+                        ArrayList<String> attributsrecuperes = new ArrayList<>();
+                        HashMap<String, Class<?>> nomettypeattributs = new HashMap<>();
+                        Object objecttosave = null;
+                        Enumeration<String> nomsinput = request.getParameterNames();
+                        
+                        try
+                        {
+                            // objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor(ArrayList.class).newInstance(attributsrecuperes);
+                            objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor().newInstance();
+                        }
+                        catch(Exception e)
+                        {
+                            System.out.println("Erreur sur l'instanciation de l'objet a save : ");
+                            e.printStackTrace();
+                        }
+
+                        for (Field attribut : attributs)
+                        {
+                            System.out.println("Attribut : " + attribut.getName());
+                            System.out.println("Type Attribut : " + attribut.getType());
+
+                            nomettypeattributs.put(attribut.getName(), attribut.getType());
+                        }
+                        for (String nomattribut : nomettypeattributs.keySet())
+                        {
+                            System.out.println("nom attribut : " + nomattribut);
+                            System.out.println("type attribut : " + nomettypeattributs.get(nomattribut).toString());
+                            attributsrecuperes.add(request.getParameter(nomattribut));
+
+                            while(nomsinput.hasMoreElements())
+                            {
+                                String actualcursor = nomsinput.nextElement();
+                                System.out.println("Actual cursor : " + actualcursor);
+                                if (actualcursor.equals(nomattribut)) {
+                                    //miantso an'ilay set raha ohatra ka mitovy ilay izy
+                                    System.out.println("Mandalo ato");
+                                    try {
+                                        //raha booleen da castena
+                                        if (nomettypeattributs.get(nomattribut).toString().equals("boolean")) {
+                                            System.out.println("Mandalo booleen");
+                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Boolean.parseBoolean(request.getParameter(nomattribut)));
+                                        }
+                                        else if (nomettypeattributs.get(nomattribut).toString().equals("int")) {
+                                            System.out.println("Mandalo int");
+                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Integer.parseInt(request.getParameter(nomattribut)));
+                                        }
+                                        else
+                                        {
+                                            System.out.println("Tsy mandalo booleen");
+                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, request.getParameter(nomattribut));
+                                        }
+                                    } catch (Exception e) {
+                                        System.out.println("Exception sur l'appel du setter ");
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                            nomsinput=request.getParameterNames();
+                        }
+                        for (String attributrecupere : attributsrecuperes) {
+                            System.out.println("Attribut recupere : " + attributrecupere);
+                            
+                        }
+                        
+                        //alefa any amle JSP ilay objet ho jerena hoe tena nety ve ilay save
+                        returnedmodelview.addItem("objet", objecttosave);
+
                         for (String cledata : returnedmodelview.getData().keySet()) {
                             request.setAttribute(cledata, returnedmodelview.getData().get(cledata));
                         }
@@ -135,7 +209,7 @@ public class FrontServlet extends HttpServlet {
                         }
                         catch(Exception e)
                         {
-                            System.out.println(e.getMessage());
+                            e.printStackTrace();
                         }
                         
                         out.println("<ul>Liste des classes");
@@ -178,7 +252,8 @@ public class FrontServlet extends HttpServlet {
         }
         catch(Exception e)
         {
-            System.out.println("Exception Printwriter " + e.getMessage());
+            System.out.println("Exception Printwriter ");
+            e.printStackTrace();
         }
     }
  
@@ -195,7 +270,15 @@ public class FrontServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException
     {
-        processRequest(request, response);
+        try
+        {
+            processRequest(request, response);
+        }
+        catch(Exception e)
+        {
+            System.out.println("Exception doGet : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -209,7 +292,15 @@ public class FrontServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try
+        {
+            processRequest(request, response);
+        }
+        catch(Exception e)
+        {
+            System.out.println("Exception doPost : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
