@@ -7,6 +7,12 @@
     <title>Document</title>
 </head>
 <body>
+    <%@ page import="etu1381.framework.model.Employe" %>
     <% out.println("Liste employes"); %>
+    <% 
+        Employe objetpasse = (Employe)request.getAttribute("objet");
+
+        out.println(objetpasse.getAge());
+    %>
 </body>
 </html>

@@ -4,6 +4,8 @@
  */
 package etu1381.framework.model;
 
+import java.util.ArrayList;
+
 import etu1381.framework.annotation.URLAnnotation;
 import etu1381.framework.modelview.ModelView;
 
@@ -18,6 +20,19 @@ public class Departement {
     public Departement(int id, String nom) {
         this.setId(id);
         this.setNom(nom);
+    }
+
+    public Departement(String id, String nom)
+    {
+        this.setId(Integer.parseInt(id));
+        this.setNom(nom);
+    }
+
+    public Departement(ArrayList<String> attributsparametres)
+    {
+        this.setId(Integer.parseInt(attributsparametres.get(0)));
+        this.setNom(attributsparametres.get(1));
+
     }
 
     public Departement() {

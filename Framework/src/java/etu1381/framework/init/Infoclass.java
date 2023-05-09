@@ -60,7 +60,7 @@ public class Infoclass {
         }
         catch(Exception e)
         {
-            System.out.println(e.getMessage());
+            System.out.println("Exception sur la recuperation des classes " + e.getMessage());
             throw e;
         }
         return listeclasses;
@@ -89,7 +89,7 @@ public class Infoclass {
         }
         catch(Exception e)
         {
-            System.out.println(e.getMessage());
+            System.out.println("Exception sur la recuperation des classes " + e.getMessage());
             throw e;
         }
 
