@@ -8,5 +8,6 @@
 </head>
 <body>
     <% out.println("Recherche Employe"); %>
+    <% out.println(request.getAttribute("id_azo")); %>
 </body>
 </html>

@@ -5,6 +5,7 @@
 package etu1381.framework.model;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import etu1381.framework.annotation.URLAnnotation;
 import etu1381.framework.modelview.ModelView;
@@ -57,13 +58,28 @@ public class Employe {
     }
 
     @URLAnnotation("/urlemployeparid")
-    public ModelView getempbyid(int id)
+    public ModelView getempbyid(Integer id)
     {
         Employe[] tabemployes = new Employe[3];
         tabemployes[0] = new Employe(1, "Jean", 22, true);
         tabemployes[1] = new Employe(2, "Jacques", 31, false);
         tabemployes[2] = new Employe(3, "Soa", 25, false);
-        return new ModelView("SearchEmp");
+        return new ModelView("SearchEmpId");
+
+        // return tabemployes[1];
+    }
+
+    @URLAnnotation("/urlemployeparidetnom")
+    public ModelView getempbyidandname(Integer id, String nom)
+    {
+        // Employe[] tabemployes = new Employe[3];
+        // tabemployes[0] = new Employe(1, "Jean", 22, true);
+        // tabemployes[1] = new Employe(2, "Jacques", 31, false);
+        // tabemployes[2] = new Employe(3, "Soa", 25, false);
+        ModelView mv = new ModelView("SearchEmp");
+        mv.setData(new HashMap<String, Object>());
+        mv.addItem("id_azo", id.intValue());
+        return mv;
 
         // return tabemployes[1];
     }

@@ -1,0 +1,1 @@
+# Note : les parametres des methodes dans les classes doivent etre de types generiques
