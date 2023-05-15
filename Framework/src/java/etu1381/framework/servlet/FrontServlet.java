@@ -7,8 +7,11 @@ package etu1381.framework.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -90,34 +93,84 @@ public class FrontServlet extends HttpServlet {
                     ModelView returnedmodelview = null;
                     if (typederetour.equals("ModelView"))
                     {
-                        // get the parameter types for the method
-                        Class<?>[] parameterTypes = matchedmethod.getParameterTypes();
+                        //get the Parameters of the method
+                        Parameter[] parametresmethode = matchedmethod.getParameters();
                         // create an array of arguments to pass to the method
-                        Object[] arguments = new Object[parameterTypes.length];
+                        // Object[] arguments = new Object[parameterTypes.length];
+                        ArrayList<Object> arguments = new ArrayList<>();
                         // set the arguments to appropriate values (in this case, null)
-                        Arrays.fill(arguments, null);
+                        //Sprint 7 : raha tsy misy arguments ilay methode
+                        if(parametresmethode.length==0)
+                        {
+                            arguments.add(null);
+                        }
+                        
+                        //Sprint 8 : raha misy arguments ilay methode
+                        else
+                        {
+                            Enumeration<String> nomsinput = request.getParameterNames();
+                            for(Parameter parametremethode : parametresmethode)
+                            {
+                                System.out.println("Argument actuel : " + parametremethode.getName());
+                                while(nomsinput.hasMoreElements())
+                                {
+                                    String nominput = nomsinput.nextElement();
+                                    String valeurrecuperee = request.getParameter(nominput);
+                                    System.out.println("Valeur recupere from input : " + valeurrecuperee);
+                                    if (nominput.equals(parametremethode.getName())) 
+                                    {
+                                        try {
+                                            arguments.add(parametremethode.getType().getConstructor(String.class).newInstance(valeurrecuperee));
+                                        }
+                                        catch(InvocationTargetException inve) 
+                                        {
+                                            inve.printStackTrace();
+                                        }
+                                        catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                                nomsinput = request.getParameterNames();
+                            }
+                        }
+                        System.out.println("Taille arguments : " + arguments.size());
+                        for (Object argument : arguments) 
+                        {
+                            System.out.println("type argument : " + argument.getClass().getName()); 
+                        }
+
                         //atao dynamique ilay invoke
-                        returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments);
+                        try
+                        {
+                            returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
+                        }
+                        catch(Exception e)
+                        {
+                            e.printStackTrace();
+                        }
                         //out.println("Mi retourne modelView => jsp : " + returnedmodelview.getView());
                         //Sprint 6 : avant de dispatch, mettre des informations dans la requete
                         //test de valeurs dans l'attribut data
-                        returnedmodelview.setData(new HashMap<String, Object>());
+                        // returnedmodelview.setData(new HashMap<String, Object>());
                         returnedmodelview.addItem("Nom", new String("Rakoto"));
                         returnedmodelview.addItem("Prenom", new String("Jean"));
                         //test de valeurs dans l'attribut data
-
-                        
 
                         //Sprint7 : maka donnees avy any anaty formulaire dia mi-save objet dia mi rediriger ao amle page teo ihany
                         Field[] attributs = Class.forName(matchedmapping.getClassName()).getDeclaredFields();
                         ArrayList<String> attributsrecuperes = new ArrayList<>();
                         HashMap<String, Class<?>> nomettypeattributs = new HashMap<>();
                         Object objecttosave = null;
-                        Enumeration<String> nomsinput = request.getParameterNames();
+                        
+                        // Sprint 8 : raha ohatra ka misy parametres ilay methode sy ilay URL
                         
                         try
                         {
+                            //Sprint 8
                             // objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor(ArrayList.class).newInstance(attributsrecuperes);
+                            
+                            //Sprint 7
                             objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor().newInstance();
                         }
                         catch(Exception e)
@@ -126,49 +179,52 @@ public class FrontServlet extends HttpServlet {
                             e.printStackTrace();
                         }
 
-                        for (Field attribut : attributs)
-                        {
-                            System.out.println("Attribut : " + attribut.getName());
-                            System.out.println("Type Attribut : " + attribut.getType());
+                        ////Sprint 7
+                        // for (Field attribut : attributs)
+                        // {
+                        //     System.out.println("Attribut : " + attribut.getName());
+                        //     System.out.println("Type Attribut : " + attribut.getType());
 
-                            nomettypeattributs.put(attribut.getName(), attribut.getType());
-                        }
-                        for (String nomattribut : nomettypeattributs.keySet())
-                        {
-                            System.out.println("nom attribut : " + nomattribut);
-                            System.out.println("type attribut : " + nomettypeattributs.get(nomattribut).toString());
-                            attributsrecuperes.add(request.getParameter(nomattribut));
+                        //     nomettypeattributs.put(attribut.getName(), attribut.getType());
+                        // }
+                        // for (String nomattribut : nomettypeattributs.keySet())
+                        // {
+                        //     System.out.println("nom attribut : " + nomattribut);
+                        //     System.out.println("type attribut : " + nomettypeattributs.get(nomattribut).toString());
+                        //     attributsrecuperes.add(request.getParameter(nomattribut));
 
-                            while(nomsinput.hasMoreElements())
-                            {
-                                String actualcursor = nomsinput.nextElement();
-                                System.out.println("Actual cursor : " + actualcursor);
-                                if (actualcursor.equals(nomattribut)) {
-                                    //miantso an'ilay set raha ohatra ka mitovy ilay izy
-                                    System.out.println("Mandalo ato");
-                                    try {
-                                        //raha booleen da castena
-                                        if (nomettypeattributs.get(nomattribut).toString().equals("boolean")) {
-                                            System.out.println("Mandalo booleen");
-                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Boolean.parseBoolean(request.getParameter(nomattribut)));
-                                        }
-                                        else if (nomettypeattributs.get(nomattribut).toString().equals("int")) {
-                                            System.out.println("Mandalo int");
-                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Integer.parseInt(request.getParameter(nomattribut)));
-                                        }
-                                        else
-                                        {
-                                            System.out.println("Tsy mandalo booleen");
-                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, request.getParameter(nomattribut));
-                                        }
-                                    } catch (Exception e) {
-                                        System.out.println("Exception sur l'appel du setter ");
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                            nomsinput=request.getParameterNames();
-                        }
+                        //     while(nomsinput.hasMoreElements())
+                        //     {
+                        //         String actualcursor = nomsinput.nextElement();
+                        //         System.out.println("Actual cursor : " + actualcursor);
+                        //         if (actualcursor.equals(nomattribut)) {
+                        //             //miantso an'ilay set raha ohatra ka mitovy ilay izy
+                        //             System.out.println("Mandalo ato");
+                        //             try {
+                        //                 //raha booleen da castena
+                        //                 if (nomettypeattributs.get(nomattribut).toString().equals("boolean")) {
+                        //                     System.out.println("Mandalo booleen");
+                        //                     objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Boolean.parseBoolean(request.getParameter(nomattribut)));
+                        //                 }
+                        //                 else if (nomettypeattributs.get(nomattribut).toString().equals("int")) {
+                        //                     System.out.println("Mandalo int");
+                        //                     objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Integer.parseInt(request.getParameter(nomattribut)));
+                        //                 }
+                        //                 else
+                        //                 {
+                        //                     System.out.println("Tsy mandalo booleen");
+                        //                     objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, request.getParameter(nomattribut));
+                        //                 }
+                        //             } catch (Exception e) {
+                        //                 System.out.println("Exception sur l'appel du setter ");
+                        //                 e.printStackTrace();
+                        //             }
+                        //         }
+                        //     }
+                        //     nomsinput=request.getParameterNames();
+                        // }
+                        ////Sprint7
+                            
                         for (String attributrecupere : attributsrecuperes) {
                             System.out.println("Attribut recupere : " + attributrecupere);
                             
