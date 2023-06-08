@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import etu1381.framework.annotation.URLAnnotation;
+import etu1381.framework.file.FileUpload;
 import etu1381.framework.modelview.ModelView;
 /**
  *
@@ -18,7 +19,17 @@ public class Employe {
     private String nom;
     private int age;
     private boolean engaged;
+    // private String descfichier;
+    // private FileUpload file;
     
+    // public FileUpload getFile() {
+    //     return file;
+    // }
+
+    // public void setFile(FileUpload file) {
+    //     this.file = file;
+    // }
+
     public Employe()
     {
     }
@@ -77,11 +88,22 @@ public class Employe {
         // tabemployes[1] = new Employe(2, "Jacques", 31, false);
         // tabemployes[2] = new Employe(3, "Soa", 25, false);
         ModelView mv = new ModelView("SearchEmp");
-        mv.setData(new HashMap<String, Object>());
-        mv.addItem("id_azo", id.intValue());
+        try {
+            mv.addItem("id_azo", id.intValue());
+        } catch (NullPointerException nullex) {
+            mv.setData(new HashMap<String, Object>());
+            mv.addItem("id_azo", id.intValue());
+        }
         return mv;
 
         // return tabemployes[1];
+    }
+
+    @URLAnnotation("/urlfichieremp")
+    public ModelView traitementfichieremp()
+    {
+        ModelView mv = new ModelView("ResultfichierEmp");
+        return mv;
     }
 
     @URLAnnotation("/urlcoucouemploye")
