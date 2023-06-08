@@ -5,6 +5,7 @@
  */
 package etu1381.framework.servlet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -24,8 +25,15 @@ import javax.servlet.RequestDispatcher;
 import java.util.List;
 import etu1381.framework.Mapping;
 import etu1381.framework.annotation.URLAnnotation;
+import etu1381.framework.file.FileUpload;
 import etu1381.framework.init.Infoclass;
 import etu1381.framework.modelview.ModelView;
+import javax.servlet.http.Part;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 
 
 /**
@@ -72,6 +80,7 @@ public class FrontServlet extends HttpServlet {
             //Sprint 5 : test sy mitovy ilay URL sur navigateur sy ny iray amin'ilay key hashmap
             Mapping matchedmapping = null;
             int indice = 0;
+            Enumeration<String> nomsinput = request.getParameterNames();
             for(String cle : hashmap.keySet())
             {
                 indice++;
@@ -102,13 +111,24 @@ public class FrontServlet extends HttpServlet {
                         //Sprint 7 : raha tsy misy arguments ilay methode
                         if(parametresmethode.length==0)
                         {
-                            arguments.add(null);
+                            System.out.println("Mandalo arguments null");
+                            System.out.println("Nombre d'arguments de la methode : " + arguments.size());
+                            //atao dynamique ilay invoke
+                            try
+                            {
+                                returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance());
+                            }
+                            catch(Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+                            
                         }
                         
                         //Sprint 8 : raha misy arguments ilay methode
                         else
                         {
-                            Enumeration<String> nomsinput = request.getParameterNames();
+                            
                             for(Parameter parametremethode : parametresmethode)
                             {
                                 System.out.println("Argument actuel : " + parametremethode.getName());
@@ -133,28 +153,37 @@ public class FrontServlet extends HttpServlet {
                                 }
                                 nomsinput = request.getParameterNames();
                             }
-                        }
-                        System.out.println("Taille arguments : " + arguments.size());
-                        for (Object argument : arguments) 
-                        {
-                            System.out.println("type argument : " + argument.getClass().getName()); 
-                        }
+                            System.out.println("Taille arguments : " + arguments.size());
+                            for (Object argument : arguments) 
+                            {
+                                System.out.println("type argument : " + argument.getClass().getName()); 
+                            }
 
-                        //atao dynamique ilay invoke
-                        try
-                        {
-                            returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
+                            System.out.println("Nombre d'arguments de la methode : " + arguments.size());
+                            //atao dynamique ilay invoke
+                            try
+                            {
+                                returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
+                            }
+                            catch(Exception e)
+                            {
+                                e.printStackTrace();
+                            }
                         }
-                        catch(Exception e)
-                        {
-                            e.printStackTrace();
-                        }
+                        
                         //out.println("Mi retourne modelView => jsp : " + returnedmodelview.getView());
                         //Sprint 6 : avant de dispatch, mettre des informations dans la requete
                         //test de valeurs dans l'attribut data
-                        // returnedmodelview.setData(new HashMap<String, Object>());
-                        returnedmodelview.addItem("Nom", new String("Rakoto"));
-                        returnedmodelview.addItem("Prenom", new String("Jean"));
+                        
+                        try {
+                            returnedmodelview.addItem("Nom", new String("Rakoto"));
+                            returnedmodelview.addItem("Prenom", new String("Jean"));
+                        } catch (NullPointerException nullex) {
+                            returnedmodelview.setData(new HashMap<String, Object>());
+                            returnedmodelview.addItem("Nom", new String("Rakoto"));
+                            returnedmodelview.addItem("Prenom", new String("Jean"));
+                        }
+                        
                         //test de valeurs dans l'attribut data
 
                         //Sprint7 : maka donnees avy any anaty formulaire dia mi-save objet dia mi rediriger ao amle page teo ihany
@@ -167,9 +196,6 @@ public class FrontServlet extends HttpServlet {
                         
                         try
                         {
-                            //Sprint 8
-                            // objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor(ArrayList.class).newInstance(attributsrecuperes);
-                            
                             //Sprint 7
                             objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor().newInstance();
                         }
@@ -179,52 +205,89 @@ public class FrontServlet extends HttpServlet {
                             e.printStackTrace();
                         }
 
-                        ////Sprint 7
-                        // for (Field attribut : attributs)
-                        // {
-                        //     System.out.println("Attribut : " + attribut.getName());
-                        //     System.out.println("Type Attribut : " + attribut.getType());
+                        //Sprint 7
+                        for (Field attribut : attributs)
+                        {
+                            System.out.println("Attribut : " + attribut.getName());
+                            System.out.println("Type Attribut : " + attribut.getType());
 
-                        //     nomettypeattributs.put(attribut.getName(), attribut.getType());
-                        // }
-                        // for (String nomattribut : nomettypeattributs.keySet())
-                        // {
-                        //     System.out.println("nom attribut : " + nomattribut);
-                        //     System.out.println("type attribut : " + nomettypeattributs.get(nomattribut).toString());
-                        //     attributsrecuperes.add(request.getParameter(nomattribut));
+                            nomettypeattributs.put(attribut.getName(), attribut.getType());
+                        }
+                        for (String nomattribut : nomettypeattributs.keySet())
+                        {
+                            System.out.println("nom attribut : " + nomattribut);
+                            System.out.println("type attribut : " + nomettypeattributs.get(nomattribut).toString());
+                            //raha tsy mifanaraka amin'ilay Sprint 7 ilay ataon' ny utilisateur dia tonga dia miala
+                            if (request.getParameter(nomattribut) == null) 
+                            {
+                                break;
+                            }
+                            attributsrecuperes.add(request.getParameter(nomattribut));
 
-                        //     while(nomsinput.hasMoreElements())
-                        //     {
-                        //         String actualcursor = nomsinput.nextElement();
-                        //         System.out.println("Actual cursor : " + actualcursor);
-                        //         if (actualcursor.equals(nomattribut)) {
-                        //             //miantso an'ilay set raha ohatra ka mitovy ilay izy
-                        //             System.out.println("Mandalo ato");
-                        //             try {
-                        //                 //raha booleen da castena
-                        //                 if (nomettypeattributs.get(nomattribut).toString().equals("boolean")) {
-                        //                     System.out.println("Mandalo booleen");
-                        //                     objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Boolean.parseBoolean(request.getParameter(nomattribut)));
-                        //                 }
-                        //                 else if (nomettypeattributs.get(nomattribut).toString().equals("int")) {
-                        //                     System.out.println("Mandalo int");
-                        //                     objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Integer.parseInt(request.getParameter(nomattribut)));
-                        //                 }
-                        //                 else
-                        //                 {
-                        //                     System.out.println("Tsy mandalo booleen");
-                        //                     objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, request.getParameter(nomattribut));
-                        //                 }
-                        //             } catch (Exception e) {
-                        //                 System.out.println("Exception sur l'appel du setter ");
-                        //                 e.printStackTrace();
-                        //             }
-                        //         }
-                        //     }
-                        //     nomsinput=request.getParameterNames();
-                        // }
-                        ////Sprint7
-                            
+                            while(nomsinput.hasMoreElements())
+                            {
+                                String actualcursor = nomsinput.nextElement();
+                                System.out.println("Actual cursor : " + actualcursor);
+                                if (actualcursor.equals(nomattribut)) {
+                                    
+                                    //Sprint 7
+                                    //miantso an'ilay set raha ohatra ka mitovy ilay izy
+                                    System.out.println("Mandalo ato");
+                                    try {
+                                        //raha booleen da castena
+                                        if (nomettypeattributs.get(nomattribut).toString().equals("boolean")) {
+                                            System.out.println("Mandalo booleen");
+                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Boolean.parseBoolean(request.getParameter(nomattribut)));
+                                        }
+                                        else if (nomettypeattributs.get(nomattribut).toString().equals("int")) {
+                                            System.out.println("Mandalo int");
+                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, Integer.parseInt(request.getParameter(nomattribut)));
+                                        }
+                                        else
+                                        {
+                                            System.out.println("Tsy mandalo booleen");
+                                            objecttosave.getClass().getMethod("set"+Character.toUpperCase(nomattribut.toCharArray()[0])+nomattribut.substring(1), nomettypeattributs.get(nomattribut)).invoke(objecttosave, request.getParameter(nomattribut));
+                                        }
+                                    } catch (Exception e) {
+                                        System.out.println("Exception sur l'appel du setter ");
+                                        e.printStackTrace(); 
+                                    }
+                                }
+                            }
+                            nomsinput=request.getParameterNames();
+                        }
+
+                        
+                        //Sprint7
+                        
+                        //Sprint 9 : traitement des upload fichiers
+                        System.out.println("Mandalo traitement fichier");
+                        FileUpload file = new FileUpload();
+                        for (Part filepart : request.getParts()) {
+                            try {
+                                file.setName(Paths.get(filepart.getSubmittedFileName()).getFileName().toString());
+                                InputStream is = filepart.getInputStream();
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                byte[] buffer = new byte[4096];
+                                int bytesRead;
+                                while((bytesRead = is.read(buffer)) != -1)
+                                {
+                                    baos.write(buffer, 0, bytesRead);
+                                }
+                                file.setBytearray(baos.toByteArray());
+                                System.out.println("taille byte array : " + file.getBytearray().length);
+                                returnedmodelview.addItem("tableaubyte", file.getBytearray().length);
+                            }
+                            catch (InvalidPathException ipathe) 
+                            {
+                                ipathe.printStackTrace();
+                            }
+                            catch (Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+                        }
+                        
                         for (String attributrecupere : attributsrecuperes) {
                             System.out.println("Attribut recupere : " + attributrecupere);
                             
