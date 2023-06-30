@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <%= request.getAttribute("nomfichier") %>
-    <%= request.getAttribute("tableaubyte") %>
-</body> 
+    <% out.println("Resultat Ressource"); %>
+    <% out.println(request.getAttribute("quantite_azo")); %>
+</body>
 </html>

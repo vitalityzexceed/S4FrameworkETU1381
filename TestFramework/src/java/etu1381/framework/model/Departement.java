@@ -6,6 +6,7 @@ package etu1381.framework.model;
 
 import java.util.ArrayList;
 
+import etu1381.framework.annotation.Scope;
 import etu1381.framework.annotation.URLAnnotation;
 import etu1381.framework.modelview.ModelView;
 
@@ -13,7 +14,8 @@ import etu1381.framework.modelview.ModelView;
  *
  * @author zexceed
  */
-public class Departement {
+@Scope("singleton")
+public class Departement extends Resetable {
     private int id;
     private String nom;
     
