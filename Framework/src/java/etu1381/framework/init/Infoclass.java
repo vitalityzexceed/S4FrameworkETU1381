@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import etu1381.framework.Mapping;
+import etu1381.framework.annotation.Scope;
 import etu1381.framework.annotation.URLAnnotation;
 
 /**
@@ -104,6 +105,30 @@ public class Infoclass {
                     url = annotation.value();
                     hashmap.put(url, new Mapping(classe.getName(), methode.getName()));
                 }
+            }
+        }
+
+        return hashmap;
+    }
+
+    public static HashMap<Class<?>, Object> getscopehashmap() throws Exception
+    {
+        HashMap<Class<?>, Object> hashmap = new HashMap<>();
+
+        List<Class<?>> listeclasses = new ArrayList<>();
+        try{
+            listeclasses = recupclasses();
+        }
+        catch(Exception e)
+        {
+            System.out.println("Exception sur la recuperation des classes sur getscope" + e.getMessage());
+            throw e;
+        }
+
+        for(Class<?> classe : listeclasses)
+        {
+            if (classe.isAnnotationPresent(Scope.class)) {
+                hashmap.put(classe, classe.getConstructor().newInstance());
             }
         }
 

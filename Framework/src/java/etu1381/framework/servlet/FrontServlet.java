@@ -51,6 +51,11 @@ public class FrontServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+
+    private HashMap<String, Mapping> hashmap = new HashMap<>();
+    private HashMap<Class<?>, Object> hashmapsingleton = new HashMap<>();
+    
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException{
         response.setContentType("text/html;charset=UTF-8");
@@ -69,13 +74,7 @@ public class FrontServlet extends HttpServlet {
                 e.printStackTrace();
             }
 
-            HashMap<String, Mapping> hashmap = new HashMap<>();
-
-            try {
-                hashmap = Infoclass.geturlannotationhashmap();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            
 
             //Sprint 5 : test sy mitovy ilay URL sur navigateur sy ny iray amin'ilay key hashmap
             Mapping matchedmapping = null;
@@ -108,27 +107,42 @@ public class FrontServlet extends HttpServlet {
                         // Object[] arguments = new Object[parameterTypes.length];
                         ArrayList<Object> arguments = new ArrayList<>();
                         // set the arguments to appropriate values (in this case, null)
+                        //Sprint 10 : singleton
+                        HashMap<Class<?>, Object> hashmapsingleton = null;
+                        try {
+                            hashmapsingleton = this.getHashmapsingleton();
+                            
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         //Sprint 7 : raha tsy misy arguments ilay methode
                         if(parametresmethode.length==0)
                         {
                             System.out.println("Mandalo arguments null");
                             System.out.println("Nombre d'arguments de la methode : " + arguments.size());
                             //atao dynamique ilay invoke
-                            try
-                            {
-                                returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance());
-                            }
-                            catch(Exception e)
-                            {
-                                e.printStackTrace();
-                            }
                             
+                            try {
+                                try {
+                                    //reset attributes
+                                    hashmapsingleton.get(Class.forName(matchedmapping.getClassName())).getClass().getMethod("resetAttributes").invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())));
+                                } catch (Exception inve) {
+                                    inve.printStackTrace();
+                                    System.out.println("Tsy Mandalo singleton");
+                                    returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
+                            
+                                }
+                                //raha ilay classe singleton no antsoina
+                                System.out.println("Mandalo singleton");
+                                returnedmodelview = (ModelView)matchedmethod.invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())));
+                            } catch (Exception e) {
+                                //raha tsy ilay classe singleton no antsoina
+                                e.printStackTrace();
+                               }
                         }
-                        
                         //Sprint 8 : raha misy arguments ilay methode
                         else
                         {
-                            
                             for(Parameter parametremethode : parametresmethode)
                             {
                                 System.out.println("Argument actuel : " + parametremethode.getName());
@@ -161,14 +175,25 @@ public class FrontServlet extends HttpServlet {
 
                             System.out.println("Nombre d'arguments de la methode : " + arguments.size());
                             //atao dynamique ilay invoke
-                            try
-                            {
-                                returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
-                            }
-                            catch(Exception e)
-                            {
+                            
+                            //Sprint 10
+                            try {
+                                //raha ilay classe singleton no antsoina
+                                try {
+                                    //reset attributes
+                                    hashmapsingleton.get(Class.forName(matchedmapping.getClassName())).getClass().getMethod("resetAttributes").invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())));
+                                } catch (Exception inve) {
+                                    inve.printStackTrace();
+                                    System.out.println("Tsy Mandalo singleton");
+                                    returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
+                            
+                                }
+                                System.out.println("Mandalo singleton");
+                                returnedmodelview = (ModelView)matchedmethod.invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())), arguments.toArray());
+                            } catch (Exception e) {
+                                //raha tsy ilay classe singleton no antsoina
                                 e.printStackTrace();
-                            }
+                                }
                         }
                         
                         //out.println("Mi retourne modelView => jsp : " + returnedmodelview.getView());
@@ -193,11 +218,27 @@ public class FrontServlet extends HttpServlet {
                         Object objecttosave = null;
                         
                         // Sprint 8 : raha ohatra ka misy parametres ilay methode sy ilay URL
-                        
                         try
                         {
-                            //Sprint 7
-                            objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor().newInstance();
+                            //Sprint 10
+                            try {
+                                //raha ilay classe singleton no antsoina
+                                try {
+                                    //reset attributes
+                                    hashmapsingleton.get(Class.forName(matchedmapping.getClassName())).getClass().getMethod("resetAttributes").invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())));
+                                } catch (Exception inve) {
+                                    inve.printStackTrace();
+                                    System.out.println("Tsy Mandalo singleton");
+                                    objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor().newInstance();
+                                }
+                                //Sprint 7
+                                System.out.println("Mandalo singleton");
+                                objecttosave = hashmapsingleton.get(Class.forName(matchedmapping.getClassName()));
+
+                            } catch (Exception e) {
+                                //raha tsy ilay classe singleton no antsoina
+                                e.printStackTrace();
+                            }
                         }
                         catch(Exception e)
                         {
@@ -261,30 +302,34 @@ public class FrontServlet extends HttpServlet {
                         //Sprint7
                         
                         //Sprint 9 : traitement des upload fichiers
-                        System.out.println("Mandalo traitement fichier");
-                        FileUpload file = new FileUpload();
-                        for (Part filepart : request.getParts()) {
-                            try {
-                                file.setName(Paths.get(filepart.getSubmittedFileName()).getFileName().toString());
-                                InputStream is = filepart.getInputStream();
-                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                byte[] buffer = new byte[4096];
-                                int bytesRead;
-                                while((bytesRead = is.read(buffer)) != -1)
-                                {
-                                    baos.write(buffer, 0, bytesRead);
+                        String contentType = request.getContentType();
+                        if (contentType != null && contentType.toLowerCase().startsWith("multipart/form-data")) {
+                            System.out.println("Mandalo traitement fichier");
+                            FileUpload file = new FileUpload();
+                            for (Part filepart : request.getParts()) {
+                                try {
+                                    file.setName(Paths.get(filepart.getSubmittedFileName()).getFileName().toString());
+                                    InputStream is = filepart.getInputStream();
+                                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                    byte[] buffer = new byte[4096];
+                                    int bytesRead;
+                                    while((bytesRead = is.read(buffer)) != -1)
+                                    {
+                                        baos.write(buffer, 0, bytesRead);
+                                    }
+                                    file.setBytearray(baos.toByteArray());
+                                    System.out.println("taille byte array : " + file.getBytearray().length);
+                                    returnedmodelview.addItem("tableaubyte", file.getBytearray().length);
+                                    returnedmodelview.addItem("nomfichier", file.getName());
                                 }
-                                file.setBytearray(baos.toByteArray());
-                                System.out.println("taille byte array : " + file.getBytearray().length);
-                                returnedmodelview.addItem("tableaubyte", file.getBytearray().length);
-                            }
-                            catch (InvalidPathException ipathe) 
-                            {
-                                ipathe.printStackTrace();
-                            }
-                            catch (Exception e)
-                            {
-                                e.printStackTrace();
+                                catch (InvalidPathException ipathe) 
+                                {
+                                    ipathe.printStackTrace();
+                                }
+                                catch (Exception e)
+                                {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                         
@@ -310,6 +355,7 @@ public class FrontServlet extends HttpServlet {
                 }
                 else
                 {
+                    //karazana page d'erreur fa tsy hoe makao foana ilay requete satria manjary maka an'ilay liste de classes foana
                     if (indice == hashmap.size()) {
                         /* TODO output your page here. You may use following sample code. */
                         out.println("<!DOCTYPE html>");
@@ -431,5 +477,39 @@ public class FrontServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    @Override
+    public void init() throws ServletException
+    {
+        try {
+            setHashmap(Infoclass.geturlannotationhashmap());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            setHashmapsingleton(Infoclass.getscopehashmap());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public HashMap<String, Mapping> getHashmap()
+    {
+        return this.hashmap;
+    }
+
+    public void setHashmap(HashMap<String, Mapping> hashmap)
+    {
+        this.hashmap = hashmap;
+    }
+
+    public HashMap<Class<?>, Object> getHashmapsingleton() {
+        return hashmapsingleton;
+    }
+
+    public void setHashmapsingleton(HashMap<Class<?>, Object> hashmapsingleton) {
+        this.hashmapsingleton = hashmapsingleton;
+    }
 
 }

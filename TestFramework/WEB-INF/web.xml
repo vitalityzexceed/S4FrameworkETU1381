@@ -19,6 +19,6 @@
         </session-timeout>
     </session-config>
     <welcome-file-list>
-        <welcome-file>FormSprint9.jsp</welcome-file>
+        <welcome-file>FormSprint10.jsp</welcome-file>
     </welcome-file-list>
 </web-app>

@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import etu1381.framework.annotation.Scope;
 import etu1381.framework.annotation.URLAnnotation;
 import etu1381.framework.file.FileUpload;
 import etu1381.framework.modelview.ModelView;
@@ -14,7 +15,8 @@ import etu1381.framework.modelview.ModelView;
  *
  * @author zexceed
  */
-public class Employe {
+@Scope("singleton")
+public class Employe extends Resetable{
     private int id;
     private String nom;
     private int age;
