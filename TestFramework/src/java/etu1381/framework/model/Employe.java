@@ -22,6 +22,7 @@ public class Employe extends Resetable{
     private String nom;
     private int age;
     private boolean engaged;
+    private HashMap<String, Object> session;
     // private String descfichier;
     // private FileUpload file;
     
@@ -32,6 +33,10 @@ public class Employe extends Resetable{
     // public void setFile(FileUpload file) {
     //     this.file = file;
     // }
+
+    public Employe(HashMap<String, Object> session) {
+        this.setSession(session);
+    }
 
     public Employe()
     {
@@ -153,6 +158,20 @@ public class Employe extends Resetable{
         return mv;
     }
 
+    @URLAnnotation("/urlinjection")
+    @Auth(profil="admin")
+    public ModelView injectfunction()
+    {
+        ModelView mv = new ModelView("ListeEmp.jsp");
+        try {
+            mv.addItem("nb_test", 2);
+        } catch (NullPointerException nullex) {
+            mv.setData(new HashMap<String, Object>());
+            mv.addItem("nb_test", 2);
+        }
+        return mv;
+    }
+
     public int getId() {
         return id;
     }
@@ -183,6 +202,14 @@ public class Employe extends Resetable{
 
     public void setEngaged(boolean engaged) {
         this.engaged = engaged;
+    }
+
+    public HashMap<String, Object> getSession() {
+        return session;
+    }
+
+    public void setSession(HashMap<String, Object> session) {
+        this.session = session;
     }  
 
     

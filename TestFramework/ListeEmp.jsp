@@ -13,6 +13,7 @@
         Employe objetpasse = (Employe)request.getAttribute("objet");
 
         out.println(objetpasse.getAge());
+        out.println(objetpasse.getSession().get("profil"));
     %>
 </body>
 </html>

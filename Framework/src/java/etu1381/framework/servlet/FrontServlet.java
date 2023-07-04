@@ -61,6 +61,7 @@ public class FrontServlet extends HttpServlet {
     private HashMap<Class<?>, Object> hashmapsingleton = new HashMap<>();
     private HttpSession session = null;
     private String profilactuel = null;
+    Enumeration<String> sessionAttributeNames = null;
 
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -133,6 +134,7 @@ public class FrontServlet extends HttpServlet {
                                 try {
                                     //reset attributes
                                     hashmapsingleton.get(Class.forName(matchedmapping.getClassName())).getClass().getMethod("resetAttributes").invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())));
+                                    
                                 } catch (Exception inve) {
                                     inve.printStackTrace();
                                     System.out.println("Tsy Mandalo singleton");
@@ -141,6 +143,10 @@ public class FrontServlet extends HttpServlet {
                                     //Sprint 11 : authentification
                                     if (returnedmodelview.getSessiontoadd() != null) {
                                         hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                    }
+                                    if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                    {
+                                        response.sendRedirect("ErrorAuth.jsp");
                                     }
                                     this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
                                     if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
@@ -157,6 +163,10 @@ public class FrontServlet extends HttpServlet {
                                 //Sprint 11 : authentification
                                 if (returnedmodelview.getSessiontoadd() != null) {
                                     hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                }
+                                if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                {
+                                    response.sendRedirect("ErrorAuth.jsp");
                                 }
                                 this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
                                 
@@ -223,6 +233,10 @@ public class FrontServlet extends HttpServlet {
                                     if (returnedmodelview.getSessiontoadd() != null) {
                                         hydrateSession(returnedmodelview.getSessiontoadd(), request);
                                     }
+                                    if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                    {
+                                        response.sendRedirect("ErrorAuth.jsp");
+                                    }
                                     this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
                                     
                                     if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
@@ -237,6 +251,10 @@ public class FrontServlet extends HttpServlet {
                                 //Sprint 11 : authentification
                                 if (returnedmodelview.getSessiontoadd() != null) {
                                     hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                }
+                                if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                {
+                                    response.sendRedirect("ErrorAuth.jsp");
                                 }
                                 this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
                                 
@@ -285,9 +303,45 @@ public class FrontServlet extends HttpServlet {
                                     inve.printStackTrace();
                                     System.out.println("Tsy Mandalo singleton");
                                     objecttosave = Class.forName(matchedmapping.getClassName()).getConstructor().newInstance();
+
+                                    //sprint 12 : injection sessions dans modele
+                                    sessionAttributeNames = this.getSession().getAttributeNames();
+                                    HashMap<String, Object> sessionsmodeles = new HashMap<>();
+                                    while (sessionAttributeNames.hasMoreElements()) {
+                                        String attributeName = sessionAttributeNames.nextElement();
+                                        Object attributeValue = this.getSession().getAttribute(attributeName);
+                                        sessionsmodeles.put(attributeName, attributeValue);
+                                        // Do something with the attributeName and attributeValue
+                                    }
+                                    try {
+                                        objecttosave.getClass().getMethod("setSession", HashMap.class).invoke(objecttosave, sessionsmodeles);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                    sessionAttributeNames = this.getSession().getAttributeNames();
+                                    //sprint 12 : injection sessions dans modele
+                                    
                                 }
                                 //Sprint 7
                                 System.out.println("Mandalo singleton");
+
+                                //sprint 12 : injection sessions dans modele
+                                sessionAttributeNames = this.getSession().getAttributeNames();
+                                HashMap<String, Object> sessionsmodeles = new HashMap<>();
+                                while (sessionAttributeNames.hasMoreElements()) {
+                                    String attributeName = sessionAttributeNames.nextElement();
+                                    Object attributeValue = this.getSession().getAttribute(attributeName);
+                                    sessionsmodeles.put(attributeName, attributeValue);
+                                    // Do something with the attributeName and attributeValue
+                                }
+                                try {
+                                    hashmapsingleton.get(Class.forName(matchedmapping.getClassName())).getClass().getMethod("setSession", HashMap.class).invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())), sessionsmodeles);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                sessionAttributeNames = this.getSession().getAttributeNames();
+                                //sprint 12 : injection sessions dans modele
+
                                 objecttosave = hashmapsingleton.get(Class.forName(matchedmapping.getClassName()));
 
                             } catch (Exception e) {
@@ -552,7 +606,7 @@ public class FrontServlet extends HttpServlet {
 
     public void hydrateSession(HashMap<String, Object> hashmapsession, HttpServletRequest request) throws ServletException
     {
-        HttpSession session = request.getSession();
+        HttpSession session = this.getSession();
         for (Map.Entry<String, Object> entry : hashmapsession.entrySet()) 
         {
             String cle = entry.getKey();
