@@ -9,7 +9,15 @@ public class ModelView {
     private String url;
     private HashMap<String, Object> data;
     private HashMap<String, Object> sessiontoadd;
+    private boolean isJson;
 
+    public boolean isJson() {
+        return isJson;
+    }
+
+    public void setJson(boolean isJson) {
+        this.isJson = isJson;
+    }
 
     public HashMap<String, Object> getSessiontoadd() {
         return sessiontoadd;

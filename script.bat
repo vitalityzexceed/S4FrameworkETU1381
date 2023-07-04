@@ -1,6 +1,6 @@
 set "tomcat=C:\Program Files\Apache Software Foundation\Tomcat 9.0\webapps"
 set "framework=Framework/src/java/etu1381/framework/"
-javac -parameters -d Framework/build/web/WEB-INF/classes %framework%*.java %framework%modelview/*.java %framework%annotation/*.java %framework%init/*.java %framework%servlet/*.java %framework%file/*.java %framework%util/*.java 
+javac -parameters -d Framework/build/web/WEB-INF/classes -cp "Framework/lib/servlet-api.jar;Framework/lib/gson-2.10.1.jar" %framework%*.java %framework%modelview/*.java %framework%annotation/*.java %framework%init/*.java %framework%servlet/*.java %framework%file/*.java %framework%util/*.java 
 cd Framework/build/web/WEB-INF/classes/
 jar cvf ../../../../../TestFramework/WEB-INF/lib/framework.jar etu1381
 cd ../../../../../
