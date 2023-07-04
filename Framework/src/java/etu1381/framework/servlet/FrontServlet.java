@@ -21,13 +21,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.RequestDispatcher;
 import java.util.List;
+import java.util.Map;
+
 import etu1381.framework.Mapping;
 import etu1381.framework.annotation.URLAnnotation;
 import etu1381.framework.file.FileUpload;
 import etu1381.framework.init.Infoclass;
 import etu1381.framework.modelview.ModelView;
+import etu1381.framework.util.Utilitaire;
+
 import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +59,9 @@ public class FrontServlet extends HttpServlet {
 
     private HashMap<String, Mapping> hashmap = new HashMap<>();
     private HashMap<Class<?>, Object> hashmapsingleton = new HashMap<>();
-    
+    private HttpSession session = null;
+    private String profilactuel = null;
+
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException{
@@ -73,7 +80,7 @@ public class FrontServlet extends HttpServlet {
                 System.out.println("Exception sur split url ");
                 e.printStackTrace();
             }
-
+            this.setSession(request.getSession());
             
 
             //Sprint 5 : test sy mitovy ilay URL sur navigateur sy ny iray amin'ilay key hashmap
@@ -129,12 +136,36 @@ public class FrontServlet extends HttpServlet {
                                 } catch (Exception inve) {
                                     inve.printStackTrace();
                                     System.out.println("Tsy Mandalo singleton");
+                                    
                                     returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
-                            
+                                    //Sprint 11 : authentification
+                                    if (returnedmodelview.getSessiontoadd() != null) {
+                                        hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                    }
+                                    this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
+                                    if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
+                                    {
+                                        response.sendRedirect("ErrorAuth.jsp");
+                                    }
+                                    //Sprint 11 : authentification
+                                    
                                 }
                                 //raha ilay classe singleton no antsoina
                                 System.out.println("Mandalo singleton");
+                                
                                 returnedmodelview = (ModelView)matchedmethod.invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())));
+                                //Sprint 11 : authentification
+                                if (returnedmodelview.getSessiontoadd() != null) {
+                                    hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                }
+                                this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
+                                
+                                if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
+                                {
+                                    response.sendRedirect("ErrorAuth.jsp");
+                                }
+                                //Sprint 11 : authentification
+
                             } catch (Exception e) {
                                 //raha tsy ilay classe singleton no antsoina
                                 e.printStackTrace();
@@ -171,9 +202,11 @@ public class FrontServlet extends HttpServlet {
                             for (Object argument : arguments) 
                             {
                                 System.out.println("type argument : " + argument.getClass().getName()); 
+                                System.out.println("Vakeur argument " + argument.toString());
                             }
 
                             System.out.println("Nombre d'arguments de la methode : " + arguments.size());
+                            
                             //atao dynamique ilay invoke
                             
                             //Sprint 10
@@ -186,14 +219,36 @@ public class FrontServlet extends HttpServlet {
                                     inve.printStackTrace();
                                     System.out.println("Tsy Mandalo singleton");
                                     returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
-                            
+                                    //Sprint 11 : authentification
+                                    if (returnedmodelview.getSessiontoadd() != null) {
+                                        hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                    }
+                                    this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
+                                    
+                                    if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
+                                    {
+                                        response.sendRedirect("ErrorAuth.jsp");
+                                    }
+                                    //Sprint 11 : authentification
+
                                 }
                                 System.out.println("Mandalo singleton");
                                 returnedmodelview = (ModelView)matchedmethod.invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())), arguments.toArray());
+                                //Sprint 11 : authentification
+                                if (returnedmodelview.getSessiontoadd() != null) {
+                                    hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                }
+                                this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
+                                
+                                if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
+                                {
+                                    response.sendRedirect("ErrorAuth.jsp");
+                                }
+                                //Sprint 11 : authentification
                             } catch (Exception e) {
                                 //raha tsy ilay classe singleton no antsoina
                                 e.printStackTrace();
-                                }
+                            }
                         }
                         
                         //out.println("Mi retourne modelView => jsp : " + returnedmodelview.getView());
@@ -344,7 +399,8 @@ public class FrontServlet extends HttpServlet {
                         for (String cledata : returnedmodelview.getData().keySet()) {
                             request.setAttribute(cledata, returnedmodelview.getData().get(cledata));
                         }
-                        RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+".jsp");
+                        // RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+".jsp");
+                        RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+"");
                         dispat.forward(request,response);
                     }
                     else
@@ -494,6 +550,20 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
+    public void hydrateSession(HashMap<String, Object> hashmapsession, HttpServletRequest request) throws ServletException
+    {
+        HttpSession session = request.getSession();
+        for (Map.Entry<String, Object> entry : hashmapsession.entrySet()) 
+        {
+            String cle = entry.getKey();
+            Object valeur = entry.getValue();
+            if(session.getAttribute(cle) == null)
+            {
+                session.setAttribute(cle, valeur);
+            }
+        }
+    }
+
     public HashMap<String, Mapping> getHashmap()
     {
         return this.hashmap;
@@ -510,6 +580,23 @@ public class FrontServlet extends HttpServlet {
 
     public void setHashmapsingleton(HashMap<Class<?>, Object> hashmapsingleton) {
         this.hashmapsingleton = hashmapsingleton;
+    }
+
+    
+    public HttpSession getSession() {
+        return session;
+    }
+
+    public void setSession(HttpSession session) {
+        this.session = session;
+    }
+    
+    public String getProfilactuel() {
+        return profilactuel;
+    }
+
+    public void setProfilactuel(String profilactuel) {
+        this.profilactuel = profilactuel;
     }
 
 }

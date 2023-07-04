@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import etu1381.framework.annotation.Auth;
 import etu1381.framework.annotation.Scope;
 import etu1381.framework.annotation.URLAnnotation;
 import etu1381.framework.file.FileUpload;
@@ -60,13 +61,14 @@ public class Employe extends Resetable{
     }
 
     @URLAnnotation("/urlemployerehetra")
+    @Auth(profil="admin")
     public ModelView getall()
     {
         Employe[] tabemployes = new Employe[3];
         tabemployes[0] = new Employe(1, "Jean", 22, true);
         tabemployes[1] = new Employe(2, "Jacques", 31, false);
         tabemployes[2] = new Employe(3, "Soa", 25, false);
-        return new ModelView("ListeEmp");
+        return new ModelView("ListeEmp.jsp");
         // return tabemployes;
     }
 
@@ -77,7 +79,7 @@ public class Employe extends Resetable{
         tabemployes[0] = new Employe(1, "Jean", 22, true);
         tabemployes[1] = new Employe(2, "Jacques", 31, false);
         tabemployes[2] = new Employe(3, "Soa", 25, false);
-        return new ModelView("SearchEmpId");
+        return new ModelView("SearchEmpId.jsp");
 
         // return tabemployes[1];
     }
@@ -89,7 +91,7 @@ public class Employe extends Resetable{
         // tabemployes[0] = new Employe(1, "Jean", 22, true);
         // tabemployes[1] = new Employe(2, "Jacques", 31, false);
         // tabemployes[2] = new Employe(3, "Soa", 25, false);
-        ModelView mv = new ModelView("SearchEmp");
+        ModelView mv = new ModelView("SearchEmp.jsp");
         try {
             mv.addItem("id_azo", id.intValue());
         } catch (NullPointerException nullex) {
@@ -104,7 +106,7 @@ public class Employe extends Resetable{
     @URLAnnotation("/urlfichieremp")
     public ModelView traitementfichieremp()
     {
-        ModelView mv = new ModelView("ResultfichierEmp");
+        ModelView mv = new ModelView("ResultfichierEmp.jsp");
         return mv;
     }
 
@@ -112,6 +114,43 @@ public class Employe extends Resetable{
     public String getcoucou()
     {
         return "coucou";
+    }
+
+    @URLAnnotation("/urlloginemp")
+    public ModelView login(String profil)
+    {
+        ModelView mv = new ModelView("FormSprint11.jsp");
+        mv.setSessiontoadd(new HashMap<String, Object>());
+        mv.getSessiontoadd().put("profil", profil);
+        return mv;
+    }
+
+    @URLAnnotation("/urladmin")
+    @Auth(profil="admin")
+    public ModelView adminfunction(String valeur)
+    {
+        ModelView mv = new ModelView("SuccessAuth.jsp");
+        try {
+            mv.addItem("nb_test", 2);
+        } catch (NullPointerException nullex) {
+            mv.setData(new HashMap<String, Object>());
+            mv.addItem("nb_test", 2);
+        }
+        return mv;
+    }
+
+    @URLAnnotation("/urlinterdit")
+    @Auth(profil="compta")
+    public ModelView forbiddenfunction(String valeur)
+    {
+        ModelView mv = new ModelView("SuccessAuth.jsp");
+        try {
+            mv.addItem("nb_test", 2);
+        } catch (NullPointerException nullex) {
+            mv.setData(new HashMap<String, Object>());
+            mv.addItem("nb_test", 2);
+        }
+        return mv;
     }
 
     public int getId() {

@@ -40,7 +40,7 @@ public class Ressource extends Resetable
         // tabemployes[0] = new Employe(1, "Jean", 22, true);
         // tabemployes[1] = new Employe(2, "Jacques", 31, false);
         // tabemployes[2] = new Employe(3, "Soa", 25, false);
-        ModelView mv = new ModelView("Viewressource");
+        ModelView mv = new ModelView("Viewressource.jsp");
         try {
             mv.addItem("quantite_azo", quantite.doubleValue());
         } catch (NullPointerException nullex) {
