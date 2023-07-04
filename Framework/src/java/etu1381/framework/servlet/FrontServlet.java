@@ -39,7 +39,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
-
+import com.google.gson.Gson;
 
 /**
  *
@@ -141,18 +141,27 @@ public class FrontServlet extends HttpServlet {
                                     
                                     returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
                                     //Sprint 11 : authentification
+                                    this.setProfilactuel("no_value");
                                     if (returnedmodelview.getSessiontoadd() != null) {
                                         hydrateSession(returnedmodelview.getSessiontoadd(), request);
                                     }
-                                    if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                    if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) != 10) 
                                     {
-                                        response.sendRedirect("ErrorAuth.jsp");
+                                        //raha misy annotation auth
+                                        if (returnedmodelview.getSessiontoadd() != null) {
+                                            hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                        }
+                                        if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                        {
+                                            response.sendRedirect("ErrorAuth.jsp");
+                                        }
+                                        this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
+                                        if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
+                                        {
+                                            response.sendRedirect("ErrorAuth.jsp");
+                                        }
                                     }
-                                    this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
-                                    if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
-                                    {
-                                        response.sendRedirect("ErrorAuth.jsp");
-                                    }
+                                    //raha tsisy annotation auth dia tsy mila authentification
                                     //Sprint 11 : authentification
                                     
                                 }
@@ -161,18 +170,26 @@ public class FrontServlet extends HttpServlet {
                                 
                                 returnedmodelview = (ModelView)matchedmethod.invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())));
                                 //Sprint 11 : authentification
+                                this.setProfilactuel("no_value");
                                 if (returnedmodelview.getSessiontoadd() != null) {
                                     hydrateSession(returnedmodelview.getSessiontoadd(), request);
                                 }
-                                if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) != 10) 
                                 {
-                                    response.sendRedirect("ErrorAuth.jsp");
-                                }
-                                this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
-                                
-                                if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
-                                {
-                                    response.sendRedirect("ErrorAuth.jsp");
+                                    //raha misy annotation auth
+                                    if (returnedmodelview.getSessiontoadd() != null) {
+                                        hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                    }
+                                    if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                    {
+                                        response.sendRedirect("ErrorAuth.jsp");
+                                    }
+                                    this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
+                                    
+                                    if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
+                                    {
+                                        response.sendRedirect("ErrorAuth.jsp");
+                                    }
                                 }
                                 //Sprint 11 : authentification
 
@@ -230,11 +247,46 @@ public class FrontServlet extends HttpServlet {
                                     System.out.println("Tsy Mandalo singleton");
                                     returnedmodelview = (ModelView)matchedmethod.invoke(Class.forName(matchedmapping.getClassName()).newInstance(), arguments.toArray());
                                     //Sprint 11 : authentification
+                                    this.setProfilactuel("no_value");
+                                    if (returnedmodelview.getSessiontoadd() != null) {
+                                        hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                    }
+                                    if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) != 10) 
+                                    {
+                                        //raha misy annotation auth
+                                        if (returnedmodelview.getSessiontoadd() != null) {
+                                            hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                        }
+                                        if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
+                                        {
+                                            response.sendRedirect("ErrorAuth.jsp");
+                                        }
+                                        this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
+                                        
+                                        if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
+                                        {
+                                            response.sendRedirect("ErrorAuth.jsp");
+                                        }
+                                    }
+                                    //Sprint 11 : authentification
+
+                                }
+                                System.out.println("Mandalo singleton");
+                                returnedmodelview = (ModelView)matchedmethod.invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())), arguments.toArray());
+                                //Sprint 11 : authentification
+                                this.setProfilactuel("no_value");
+                                if (returnedmodelview.getSessiontoadd() != null) {
+                                    hydrateSession(returnedmodelview.getSessiontoadd(), request);
+                                }
+                                if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) != 10) 
+                                {
+                                    //raha misy annotation auth
                                     if (returnedmodelview.getSessiontoadd() != null) {
                                         hydrateSession(returnedmodelview.getSessiontoadd(), request);
                                     }
                                     if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
                                     {
+                                        System.out.println("Session Null");
                                         response.sendRedirect("ErrorAuth.jsp");
                                     }
                                     this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
@@ -243,24 +295,6 @@ public class FrontServlet extends HttpServlet {
                                     {
                                         response.sendRedirect("ErrorAuth.jsp");
                                     }
-                                    //Sprint 11 : authentification
-
-                                }
-                                System.out.println("Mandalo singleton");
-                                returnedmodelview = (ModelView)matchedmethod.invoke(hashmapsingleton.get(Class.forName(matchedmapping.getClassName())), arguments.toArray());
-                                //Sprint 11 : authentification
-                                if (returnedmodelview.getSessiontoadd() != null) {
-                                    hydrateSession(returnedmodelview.getSessiontoadd(), request);
-                                }
-                                if (this.getSession().getAttribute(getInitParameter("profil")) == null) 
-                                {
-                                    response.sendRedirect("ErrorAuth.jsp");
-                                }
-                                this.setProfilactuel(this.getSession().getAttribute(getInitParameter("profil")).toString());
-                                
-                                if (Utilitaire.checkMethod(matchedmethod, this.getProfilactuel()) == 0) 
-                                {
-                                    response.sendRedirect("ErrorAuth.jsp");
                                 }
                                 //Sprint 11 : authentification
                             } catch (Exception e) {
@@ -450,9 +484,21 @@ public class FrontServlet extends HttpServlet {
                         //alefa any amle JSP ilay objet ho jerena hoe tena nety ve ilay save
                         returnedmodelview.addItem("objet", objecttosave);
 
-                        for (String cledata : returnedmodelview.getData().keySet()) {
-                            request.setAttribute(cledata, returnedmodelview.getData().get(cledata));
+                        //Sprint 13 : change mv data to JSON if isJson is true
+                        String jsoneddata = null;
+                        if (returnedmodelview.isJson()) {
+                            Gson gson = new Gson();
+                            jsoneddata = gson.toJson(returnedmodelview.getData());
+                            request.setAttribute("dataJSON", jsoneddata);
                         }
+                        //Sprint 13 : change mv data to JSON if isJson is true
+                        else{
+                            for (String cledata : returnedmodelview.getData().keySet()) {
+                                request.setAttribute(cledata, returnedmodelview.getData().get(cledata));
+                            }
+                        }
+
+                        
                         // RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+".jsp");
                         RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+"");
                         dispat.forward(request,response);
@@ -613,6 +659,7 @@ public class FrontServlet extends HttpServlet {
             Object valeur = entry.getValue();
             if(session.getAttribute(cle) == null)
             {
+                System.out.println("Tsy nisy tam voloany le sesssion");
                 session.setAttribute(cle, valeur);
             }
         }

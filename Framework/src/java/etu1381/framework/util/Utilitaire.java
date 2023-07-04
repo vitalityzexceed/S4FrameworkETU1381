@@ -18,11 +18,14 @@ public class Utilitaire
             if (profil.equals(required_profile)) {
                 return 1;
             }
+            else
+            {
+                return 0;
+            }
         }
         else
         {
             return 10;
         }
-        return 0;
     }
 }

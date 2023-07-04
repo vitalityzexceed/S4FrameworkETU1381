@@ -172,6 +172,21 @@ public class Employe extends Resetable{
         return mv;
     }
 
+    @URLAnnotation("/urltestjson")
+    public ModelView testjson()
+    {
+        ModelView mv = new ModelView("ResultJSON.jsp");
+        mv.setJson(true);
+        try {
+            mv.addItem("nb_test", 2);
+        } catch (NullPointerException nullex) {
+            mv.setData(new HashMap<String, Object>());
+            mv.addItem("nb_test", 2);
+        }
+        return mv;
+        // return tabemployes[1];
+    }
+
     public int getId() {
         return id;
     }
