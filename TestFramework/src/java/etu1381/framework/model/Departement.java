@@ -56,12 +56,12 @@ public class Departement extends Resetable {
     @URLAnnotation("/urlsalutdepartement")
     public ModelView getsalutdepartment()
     {
-        return new ModelView("SalutDept");
+        return new ModelView("SalutDept.jsp");
     }    
 
     @URLAnnotation("/urlnbdepartements")
     public ModelView getnbdepartements()
     {
-        return new ModelView("NbDept");
+        return new ModelView("NbDept.jsp");
     }
 }

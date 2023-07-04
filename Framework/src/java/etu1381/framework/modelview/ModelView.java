@@ -8,6 +8,16 @@ import java.util.HashMap;
 public class ModelView {
     private String url;
     private HashMap<String, Object> data;
+    private HashMap<String, Object> sessiontoadd;
+
+
+    public HashMap<String, Object> getSessiontoadd() {
+        return sessiontoadd;
+    }
+
+    public void setSessiontoadd(HashMap<String, Object> sessiontoadd) {
+        this.sessiontoadd = sessiontoadd;
+    }
 
     public void setData(HashMap<String, Object> data) {
         this.data = data;
