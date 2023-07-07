@@ -211,6 +211,29 @@ public class Employe extends Resetable{
         // return tabemployes[1];
     }
 
+    @URLAnnotation("/URLlogoutemp")
+    public ModelView logout()
+    {
+        ModelView mv = new ModelView("FormSprint11.jsp");
+        mv.setData(new HashMap<String, Object>());
+        mv.setInvalidateSession(true);
+        return mv;
+    }
+
+    @URLAnnotation("/URLdelsession")
+    public ModelView delsession(String[] FrameWorksessions)
+    {
+        ModelView mv = new ModelView("FormSprint11.jsp");
+        ArrayList<String> listesession = new ArrayList<>();
+        for (String sessionName : FrameWorksessions) 
+        {
+            listesession.add(sessionName);
+        }
+        mv.setSessionToRemove(listesession);
+        mv.setData(new HashMap<String, Object>());
+        return mv;
+    }
+
     public int getId() {
         return id;
     }
