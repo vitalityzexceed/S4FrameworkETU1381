@@ -4,7 +4,7 @@ javac -parameters -d Framework/build/web/WEB-INF/classes -cp "Framework/lib/serv
 cd Framework/build/web/WEB-INF/classes/
 jar cvf ../../../../../TestFramework/WEB-INF/lib/framework.jar etu1381
 cd ../../../../../
-javac -parameters -d TestFramework/WEB-INF/classes -cp "TestFramework/WEB-INF/lib/framework.jar" TestFramework/src/java/etu1381/framework/model/*.java
+javac -parameters -d TestFramework/WEB-INF/classes -cp "TestFramework/WEB-INF/lib/framework.jar;TestFramework/WEB-INF/lib/gson-2.10.1.jar" TestFramework/src/java/etu1381/framework/model/*.java
 robocopy "TestFramework" "FrameworkToDeploy" /E /XD "src"
 cd FrameworkToDeploy
 jar -cvf ../FrameworkToDeploy.war *
