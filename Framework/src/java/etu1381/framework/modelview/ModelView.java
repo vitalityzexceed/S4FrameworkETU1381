@@ -11,6 +11,9 @@ public class ModelView {
     private HashMap<String, Object> sessiontoadd;
     private boolean isJson;
 
+    public ModelView() {
+    }
+
     public boolean isJson() {
         return isJson;
     }

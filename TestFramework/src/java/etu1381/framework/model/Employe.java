@@ -8,10 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import etu1381.framework.annotation.Auth;
+import etu1381.framework.annotation.OnlyJSON;
 import etu1381.framework.annotation.Scope;
 import etu1381.framework.annotation.URLAnnotation;
 import etu1381.framework.file.FileUpload;
 import etu1381.framework.modelview.ModelView;
+import com.google.gson.Gson;
+
 /**
  *
  * @author zexceed
@@ -23,6 +26,7 @@ public class Employe extends Resetable{
     private int age;
     private boolean engaged;
     private HashMap<String, Object> session;
+    
     // private String descfichier;
     // private FileUpload file;
     
@@ -184,6 +188,26 @@ public class Employe extends Resetable{
             mv.addItem("nb_test", 2);
         }
         return mv;
+        // return tabemployes[1];
+    }
+
+    @URLAnnotation("/urljsononly")
+    @OnlyJSON(value = "array", view = ".jsp")
+    public Employe[] empall()
+    {
+        // ModelView mv = new ModelView("OnlyJSON.jsp");
+        Employe[] tabemployes = new Employe[3];
+        tabemployes[0] = new Employe(1, "Jean", 22, true);
+        tabemployes[1] = new Employe(2, "Jacques", 31, false);
+        tabemployes[2] = new Employe(3, "Soa", 25, false);
+        // try {
+        //     mv.addItem("nb_test", 2);
+        // } catch (NullPointerException nullex) {
+        //     mv.setData(new HashMap<String, Object>());
+        //     mv.addItem("nb_test", 2);
+        // }
+        
+        return tabemployes;
         // return tabemployes[1];
     }
 
