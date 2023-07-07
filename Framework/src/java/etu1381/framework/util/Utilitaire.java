@@ -1,12 +1,16 @@
 package etu1381.framework.util;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import etu1381.framework.annotation.Auth;
 import etu1381.framework.annotation.OnlyJSON;
 import etu1381.framework.modelview.ModelView;
-
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 public class Utilitaire 
 {
@@ -60,6 +64,45 @@ public class Utilitaire
         }
     }
 
+    public static void removeAllSessions(HttpServletRequest request, HttpServletResponse response, String urlredirect) throws IllegalStateException, Exception
+    {
+        HttpSession httpsession = request.getSession();
+        try {
+            httpsession.invalidate();
+            response.setContentType("text/html");
+            response.getWriter().println("Logout success, Redirecting to the front page ...");
+            response.setHeader("Refresh", "5; URL="+urlredirect);
+        } catch (IllegalStateException ise) {
+            System.out.println("Efa vide ilay HttpSession");
+            ise.printStackTrace();
+            throw ise;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void removesession(ArrayList<String> sessionsToRemove, HttpServletRequest request) throws IllegalStateException, Exception
+    {
+        HttpSession httpsession = request.getSession();
+        for (String session : sessionsToRemove) {
+            try {
+                httpsession.removeAttribute(session);
+            }
+            catch(IllegalStateException ise) 
+            {
+                System.out.println("Efa tsy bound @ HttpSession intsony ilay session tiana ho fafana");
+                ise.printStackTrace();
+                throw ise;
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                throw e;
+            }
+        }
+    }
     // public HashMap<String, Object> bypassinvokenomodelview(Object dataretourmethode)
     // {
     //     HashMap<String, Object> hashmap = new HashMap<String, Object>();

@@ -13,6 +13,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -209,19 +211,97 @@ public class FrontServlet extends HttpServlet {
                                 {
                                     String nominput = nomsinput.nextElement();
                                     String valeurrecuperee = request.getParameter(nominput);
+                                    String[] incaseofcheckboxes = request.getParameterValues(nominput);
                                     System.out.println("Valeur recupere from input : " + valeurrecuperee);
                                     if (nominput.equals(parametremethode.getName())) 
                                     {
-                                        try {
-                                            arguments.add(parametremethode.getType().getConstructor(String.class).newInstance(valeurrecuperee));
-                                        }
-                                        catch(InvocationTargetException inve) 
+                                        if (!nominput.equals("FrameWorksessions"))
                                         {
-                                            inve.printStackTrace();
+                                            
+                                            
+                                            System.out.println("Tsy mandalo checkbox bdb");
+                                            try {
+                                                arguments.add(parametremethode.getType().getConstructor(String.class).newInstance(valeurrecuperee));
+                                            }
+                                            catch(InvocationTargetException inve) 
+                                            {
+                                                inve.printStackTrace();
+                                            }
+                                            catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
                                         }
-                                        catch (Exception e) {
-                                            e.printStackTrace();
+                                        else
+                                        {
+                                            System.out.println("Mandalo FrameWorksessions");
+                                            
+                                            //Sprint 15 : raha bdb ilay sessions (checkbox)
+                                            Object objetarray = null;
+                                            // Type parameterType = parametremethode.getParameterizedType();
+                                            Class<?> parameterType = parametremethode.getType().getComponentType();
+                                            System.out.println("Type du parametre : " + parameterType.getTypeName());
+                                            ArrayList<String> objetsduparametre = new ArrayList<>();
+                                            // if (parameterType instanceof ParameterizedType)
+                                            // {
+                                            //     System.out.println("Mandalo parameterizedtype");
+                                            //     //raha mitovy type daholo ny ao anatin'ilay tableau
+                                            //     ParameterizedType parameterizedType = (ParameterizedType) parameterType;
+                                            //     Type typetokana = parameterizedType.getActualTypeArguments()[0];
+                                            //     System.out.println("typetokana" + typetokana.getClass().getName());
+                                            //     // ArrayList<Object> typeofeachelement = new ArrayList<>();
+                                            //     for (String onecheckbox : incaseofcheckboxes) 
+                                            //     {
+                                            //         System.out.println("Mandalo onecheckbox");
+                                            //         try
+                                            //         {
+                                            //             objetsduparametre.add(typetokana.getClass().getConstructor(String.class).newInstance(onecheckbox));
+                                            //         }
+                                            //         catch(InvocationTargetException inve) 
+                                            //         {
+                                            //             inve.printStackTrace();
+                                            //         }
+                                            //     }
+                                            // }
+                                            // else
+                                            // {
+                                                // System.out.println("Tsy mandalo parameterizedtype");
+                                                //raha mitovy type daholo ny ao anatin'ilay tableau
+                                                // ParameterizedType parameterizedType = (ParameterizedType) parameterType;
+                                                // Type typetokana = parameterizedType.getActualTypeArguments()[0];
+                                                // System.out.println("typetokana" + typetokana.getClass().getName());
+                                                // ArrayList<Object> typeofeachelement = new ArrayList<>();
+                                                for (String onecheckbox : incaseofcheckboxes) 
+                                                {
+                                                    System.out.println("Mandalo onecheckbox");
+                                                    try
+                                                    {
+                                                        // objetsduparametre.add(typetokana.getClass().getConstructor(String.class).newInstance(onecheckbox));
+                                                        objetsduparametre.add(parameterType.getConstructor(String.class).newInstance(onecheckbox).toString());
+
+                                                    }
+                                                    catch(InvocationTargetException inve) 
+                                                    {
+                                                        inve.printStackTrace();
+                                                    }
+                                                }
+                                            // }
+                                            try {
+                                                objetarray = objetsduparametre.toArray(new String[0]);
+
+                                                System.out.println("type objet array : " + objetarray.getClass().getSimpleName());
+                                                System.out.println("type objet array anakiray ao anatiny: " + objetarray.getClass().getComponentType().getSimpleName());
+                                                arguments.add(objetarray);
+                                                System.out.println("Ajouter arguments nandalo");
+                                            }
+                                            
+                                            catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
                                         }
+                                        // else
+                                        // {
+                                        //     System.out.println("Erreur hafa sur misy parametres");
+                                        // }
                                     }
                                 }
                                 nomsinput = request.getParameterNames();
@@ -493,17 +573,44 @@ public class FrontServlet extends HttpServlet {
                             jsoneddata = gson.toJson(returnedmodelview.getData());
                             request.setAttribute("dataJSON", jsoneddata);
                         }
-                        //Sprint 13 : change mv data to JSON if isJson is true
                         else{
                             for (String cledata : returnedmodelview.getData().keySet()) {
                                 request.setAttribute(cledata, returnedmodelview.getData().get(cledata));
                             }
                         }
 
+                        //Sprint15 : invalidation de sessions
+                        //raha specifiena ilay session
+                        ArrayList<String> sessionsToRemove = null;
+                        try {
+                            String[] sessionsNames = request.getParameterValues("FrameWorksessions");
+                            
+                            sessionsToRemove = new ArrayList<String>(returnedmodelview.getSessionToRemove()); 
+                            for (String string : sessionsToRemove)
+                            {
+                                Utilitaire.removesession(sessionsToRemove, request);
+                            }
+                        } catch (Exception e) {
+                            // e.printStackTrace();
+                            System.out.println("Tsy misy session personnalisé to remove");
+                        }
+                         
+                        //raha esorina daolo ilay sessions
+                        if (returnedmodelview.isInvalidateSession()) {
+                            try {
+                                Utilitaire.removeAllSessions(request, response, request.getContextPath()+"/"+returnedmodelview.getView());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                System.out.println("Efa tsy misy HttpSession to remove");
+                            }
+                        }
+                        else
+                        {
+                            // RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+".jsp");
+                            RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+"");
+                            dispat.forward(request,response);
+                        }
                         
-                        // RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+".jsp");
-                        RequestDispatcher dispat = request.getRequestDispatcher(""+returnedmodelview.getView()+"");
-                        dispat.forward(request,response);
                     }
                     else
                     {
